@@ -1,0 +1,205 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* Roast My Taste Dark Theme */
+:root {
+  /* Spotify-inspired dark theme as default */
+  --background: #121212;
+  --foreground: #ffffff;
+
+  --card: #181818;
+  --card-foreground: #ffffff;
+
+  --popover: #282828;
+  --popover-foreground: #ffffff;
+
+  --primary: #8a00c4;
+  --primary-foreground: #ffffff;
+
+  --secondary: #282828;
+  --secondary-foreground: #ffffff;
+
+  --muted: #282828;
+  --muted-foreground: #b3b3b3;
+
+  --accent: #8a00c4;
+  --accent-foreground: #ffffff;
+
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+
+  --border: #404040;
+  --input: #282828;
+
+  --ring: #8a00c4;
+
+  --chart-1: #8a00c4;
+  --chart-2: #0ea5e9;
+  --chart-3: #f59e0b;
+  --chart-4: #c026d3;
+  --chart-5: #fb923c;
+
+  --radius: 0.5rem;
+
+  --sidebar: #0d0d0d;
+  --sidebar-foreground: #ffffff;
+
+  --sidebar-primary: #8a00c4;
+  --sidebar-primary-foreground: #ffffff;
+
+  --sidebar-accent: #282828;
+  --sidebar-accent-foreground: #ffffff;
+
+  --sidebar-border: #404040;
+  --sidebar-ring: #8a00c4;
+}
+
+.dark {
+  --background: #121212;
+  --foreground: #ffffff;
+
+  --card: #181818;
+  --card-foreground: #ffffff;
+
+  --popover: #282828;
+  --popover-foreground: #ffffff;
+
+  --primary: #8a00c4;
+  --primary-foreground: #ffffff;
+
+  --secondary: #282828;
+  --secondary-foreground: #ffffff;
+
+  --muted: #282828;
+  --muted-foreground: #b3b3b3;
+
+  --accent: #8a00c4;
+  --accent-foreground: #ffffff;
+
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+
+  --border: #404040;
+  --input: #282828;
+
+  --ring: #8a00c4;
+
+  --chart-1: #8a00c4;
+  --chart-2: #0ea5e9;
+  --chart-3: #f59e0b;
+  --chart-4: #c026d3;
+  --chart-5: #fb923c;
+
+  --sidebar: #0d0d0d;
+  --sidebar-foreground: #ffffff;
+
+  --sidebar-primary: #8a00c4;
+  --sidebar-primary-foreground: #ffffff;
+
+  --sidebar-accent: #282828;
+  --sidebar-accent-foreground: #ffffff;
+
+  --sidebar-border: #404040;
+  --sidebar-ring: #8a00c4;
+}
+
+@theme inline {
+  --font-sans: 'Geist', 'Geist Fallback';
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .roast-card {
+    border-width: 2px;
+  }
+
+  .home-roast-icon {
+    animation:
+      home-roast-spin 7s linear infinite,
+      home-roast-pulse 2.4s ease-in-out infinite;
+
+    filter: drop-shadow(0 0 18px rgba(138, 0, 196, 0.75));
+  }
+}
+
+@keyframes home-roast-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes home-roast-pulse {
+  0%,
+  100% {
+    scale: 1;
+    filter: drop-shadow(0 0 16px rgba(138, 0, 196, 0.7));
+  }
+
+  50% {
+    scale: 1.07;
+    filter: drop-shadow(0 0 30px rgba(138, 0, 196, 0.95));
+  }
+}
