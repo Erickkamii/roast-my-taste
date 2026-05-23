@@ -5,14 +5,26 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${backendUrl}/api/:path*`,
-      },
-    ]
-  },
+async rewrites() {
+  return [
+    {
+      source: '/api/:path*',
+      destination: `${backendUrl}/api/:path*`,
+    },
+    {
+      source: '/oauth2/:path*',
+      destination: `${backendUrl}/oauth2/:path*`,
+    },
+    {
+      source: '/login/:path*',
+      destination: `${backendUrl}/login/:path*`,
+    },
+    {
+      source: '/logout',
+      destination: `${backendUrl}/logout`,
+    },
+  ]
+},
   images: {
     unoptimized: true,
     remotePatterns: [

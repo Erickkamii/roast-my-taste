@@ -8,4 +8,4 @@ export function backendUrl(path: string): string {
   return `${BACKEND_URL}${path.startsWith('/') ? path : `/${path}`}`
 }
 
-export const SPOTIFY_LOGIN_URL = backendUrl('/oauth2/authorization/spotify')
+export const SPOTIFY_LOGIN_URL = '/oauth2/authorization/spotify'
