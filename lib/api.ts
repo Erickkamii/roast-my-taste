@@ -1,46 +1,60 @@
 import type { SpotifyUser, SpotifyTrack, SpotifyArtist, RoastData } from './types'
 
-const fetchOptions: RequestInit = {
-  credentials: 'include',
-}
-
 const API_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8080').replace(/\/$/, '')
 
-async function fetchJson<T>(input: string): Promise<T> {
+async function fetchJson<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = getToken()
+
+  const headers = new Headers(options.headers)
+
+  headers.set('Content-Type', 'application/json')
+
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`)
+  }
+
   const controller = new AbortController()
-  const timeout = window.setTimeout(() => controller.abort(), 10000)
+  const timeout = window.setTimeout(() => controller.abort(), 15000)
+
   try {
-    const response = await fetch(input, {
-      ...fetchOptions,
+    const response = await fetch(`${API_URL}${path}`, {
+      ...options,
+      headers,                    
       signal: controller.signal,
     })
-    if (!response.ok && response.status !== 0) {
-      throw new Error(`Falha na API: ${response.status}`)
+
+    if (!response.ok) {
+      throw new Error(`Erro na API: ${response.status}`)
     }
-    if (response.type === 'opaqueredirect' || response.status === 0) {
-      throw new Error('Não autenticado')
-    }
+
     return response.json()
   } finally {
     window.clearTimeout(timeout)
   }
 }
 
-interface BackendAuthUser {
-  name: string
-  authorities?: Array<{
-    authority?: string
-    attributes?: {
-      display_name?: string
-      followers?: {
-        total?: number
-      }
-      id?: string
-      images?: Array<{
-        url: string
-      }>
-    }
-  }>
+function getToken(): string | null {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem('jwt')
+}
+
+export function saveTokenFromUrl() {
+  if (typeof window === 'undefined') return
+
+  const url = new URL(window.location.href)
+  const token = url.searchParams.get('token')
+
+  if (token) {
+    localStorage.setItem('jwt', token)
+    // Remove o token da URL
+    url.searchParams.delete('token')
+    window.history.replaceState({}, '', url.toString())
+  }
+}
+
+export function logout() {
+  localStorage.removeItem('jwt')
+  window.location.href = '/'
 }
 
 interface BackendTrack {
@@ -91,44 +105,42 @@ function mapArtist(artist: BackendArtist): SpotifyArtist {
     name: artist.name,
     images: [],
     genres: artist.genres || [],
-    followers: {
-      total: 0,
-    },
+    followers: { total: 0 },
     external_urls: {
       spotify: spotifySearchUrl('artist', artist.name),
     },
   }
 }
 
+// ============================================
+// API Functions
+// ============================================
+
 export async function fetchUserProfile(): Promise<SpotifyUser> {
-  await new Promise(resolve => setTimeout(resolve, 3000))
-  const data = await fetchJson<BackendAuthUser>(`${API_URL}/api/v1/me`)
-  const spotifyUser = data.authorities?.find((authority) => authority.attributes?.display_name)?.attributes
+  const data = await fetchJson<any>('/api/v1/me')
 
   return {
-    id: spotifyUser?.id || data.name,
-    display_name: spotifyUser?.display_name || data.name,
-    images: spotifyUser?.images || [],
-    followers: {
-      total: spotifyUser?.followers?.total || 0,
-    },
+    id: data.spotifyId,
+    display_name: data.name,
+    images: [], // Pode melhorar depois pegando do Spotify
+    followers: { total: 0 },
     country: '',
     product: '',
   }
 }
 
 export async function fetchTopTracks(_timeRange: string = 'medium_term', limit: number = 10): Promise<SpotifyTrack[]> {
-  const data = await fetchJson<BackendTrack[]>(`${API_URL}/api/v1/debug/top-tracks`)
+  const data = await fetchJson<BackendTrack[]>('/api/v1/debug/top-tracks')
   return data.slice(0, limit).map(mapTrack)
 }
 
 export async function fetchTopArtists(_timeRange: string = 'medium_term', limit: number = 10): Promise<SpotifyArtist[]> {
-  const data = await fetchJson<BackendArtist[]>(`${API_URL}/api/v1/debug/top-artists`)
+  const data = await fetchJson<BackendArtist[]>('/api/v1/debug/top-artists')
   return data.slice(0, limit).map(mapArtist)
 }
 
 export async function generateRoast(): Promise<RoastData> {
-  const data = await fetchJson<BackendRoast>(`${API_URL}/api/v1/analysis`)
+  const data = await fetchJson<BackendRoast>('/api/v1/analysis')
 
   return {
     message: data.roast,
