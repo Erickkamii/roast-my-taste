@@ -7,5 +7,4 @@ export const BACKEND_URL = (
 export function backendUrl(path: string): string {
   return `${BACKEND_URL}${path.startsWith('/') ? path : `/${path}`}`
 }
-
-export const SPOTIFY_LOGIN_URL = '/oauth2/authorization/spotify'
+export const SPOTIFY_LOGIN_URL = `${BACKEND_URL}/oauth2/authorization/spotify`
