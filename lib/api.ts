@@ -102,6 +102,7 @@ function mapArtist(artist: BackendArtist): SpotifyArtist {
 }
 
 export async function fetchUserProfile(): Promise<SpotifyUser> {
+  await new Promise(resolve => setTimeout(resolve, 3000))
   const data = await fetchJson<BackendAuthUser>(`${API_URL}/api/v1/me`)
   const spotifyUser = data.authorities?.find((authority) => authority.attributes?.display_name)?.attributes
 
