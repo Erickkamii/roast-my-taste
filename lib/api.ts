@@ -4,6 +4,8 @@ const fetchOptions: RequestInit = {
   credentials: 'include',
 }
 
+const API_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8080').replace(/\/$/, '')
+
 async function fetchJson<T>(input: string): Promise<T> {
   const controller = new AbortController()
   const timeout = window.setTimeout(() => controller.abort(), 10000)
@@ -99,7 +101,7 @@ function mapArtist(artist: BackendArtist): SpotifyArtist {
 }
 
 export async function fetchUserProfile(): Promise<SpotifyUser> {
-  const data = await fetchJson<BackendAuthUser>('/api/v1/me')
+  const data = await fetchJson<BackendAuthUser>(`${API_URL}/api/v1/me`)
   const spotifyUser = data.authorities?.find((authority) => authority.attributes?.display_name)?.attributes
 
   return {
@@ -115,17 +117,17 @@ export async function fetchUserProfile(): Promise<SpotifyUser> {
 }
 
 export async function fetchTopTracks(_timeRange: string = 'medium_term', limit: number = 10): Promise<SpotifyTrack[]> {
-  const data = await fetchJson<BackendTrack[]>('/api/v1/debug/top-tracks')
+  const data = await fetchJson<BackendTrack[]>(`${API_URL}/api/v1/debug/top-tracks`)
   return data.slice(0, limit).map(mapTrack)
 }
 
 export async function fetchTopArtists(_timeRange: string = 'medium_term', limit: number = 10): Promise<SpotifyArtist[]> {
-  const data = await fetchJson<BackendArtist[]>('/api/v1/debug/top-artists')
+  const data = await fetchJson<BackendArtist[]>(`${API_URL}/api/v1/debug/top-artists`)
   return data.slice(0, limit).map(mapArtist)
 }
 
 export async function generateRoast(): Promise<RoastData> {
-  const data = await fetchJson<BackendRoast>('/api/v1/analysis')
+  const data = await fetchJson<BackendRoast>(`${API_URL}/api/v1/analysis`)
 
   return {
     message: data.roast,
