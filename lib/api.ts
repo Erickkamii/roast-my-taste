@@ -12,7 +12,6 @@ async function fetchJson<T>(input: string): Promise<T> {
   try {
     const response = await fetch(input, {
       ...fetchOptions,
-      redirect: 'manual',
       signal: controller.signal,
     })
     if (!response.ok && response.status !== 0) {
