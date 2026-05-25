@@ -9,17 +9,18 @@ const API_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8080')
 async function fetchJson<T>(input: string): Promise<T> {
   const controller = new AbortController()
   const timeout = window.setTimeout(() => controller.abort(), 10000)
-
   try {
     const response = await fetch(input, {
       ...fetchOptions,
+      redirect: 'manual',
       signal: controller.signal,
     })
-
-    if (!response.ok) {
+    if (!response.ok && response.status !== 0) {
       throw new Error(`Falha na API: ${response.status}`)
     }
-
+    if (response.type === 'opaqueredirect' || response.status === 0) {
+      throw new Error('Não autenticado')
+    }
     return response.json()
   } finally {
     window.clearTimeout(timeout)
