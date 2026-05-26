@@ -27,43 +27,49 @@ export default function HomePage() {
     category: 'Gosto Eclético',
   }
 
-  useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        const userData = await fetchUserProfile()
-        setUser(userData)
+useEffect(() => {
+  const url = new URL(window.location.href)
+  const hasOAuthParams = url.searchParams.has('code') || url.searchParams.has('state')
 
-        setIsLoadingRoast(true)
-        const [tracks, artists, initialRoast] = await Promise.allSettled([
-          fetchTopTracks('medium_term', 20),
-          fetchTopArtists('medium_term', 20),
-          generateRoast(),
-        ])
+  // Se voltou do login com Spotify, limpa a URL e força reload (resolve problema de cookie)
+  if (hasOAuthParams) {
+    url.searchParams.delete('code')
+    url.searchParams.delete('state')
+    window.history.replaceState({}, '', url.toString())
 
-        if (tracks.status === 'fulfilled') {
-          setTopTracks(tracks.value)
-        }
-        if (artists.status === 'fulfilled') {
-          setTopArtists(artists.value)
-        }
-        setRoast(initialRoast.status === 'fulfilled' ? initialRoast.value : fallbackRoast)
+    // Força reload para garantir que o cookie de sessão seja reconhecido corretamente
+    window.location.reload()
+    return
+  }
 
-        setIsLoadingTracks(false)
-        setIsLoadingArtists(false)
-      } catch {
-        // User is not authenticated - this is expected
-        setUser(null)
-      } finally {
-        setIsLoadingUser(false)
-        setIsLoadingTracks(false)
-        setIsLoadingArtists(false)
-        setIsLoadingRoast(false)
-      }
+  const loadUserData = async () => {
+    try {
+      const userData = await fetchUserProfile()
+      setUser(userData)
+
+      setIsLoadingRoast(true)
+
+      const [tracks, artists, initialRoast] = await Promise.allSettled([
+        fetchTopTracks('medium_term', 20),
+        fetchTopArtists('medium_term', 20),
+        generateRoast(),
+      ])
+
+      if (tracks.status === 'fulfilled') setTopTracks(tracks.value)
+      if (artists.status === 'fulfilled') setTopArtists(artists.value)
+      setRoast(initialRoast.status === 'fulfilled' ? initialRoast.value : fallbackRoast)
+    } catch {
+      setUser(null)
+    } finally {
+      setIsLoadingUser(false)
+      setIsLoadingTracks(false)
+      setIsLoadingArtists(false)
+      setIsLoadingRoast(false)
     }
+  }
 
-    loadUserData()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  loadUserData()
+}, [])
 
   const handleRefreshRoast = useCallback(async () => {
     setIsLoadingRoast(true)
