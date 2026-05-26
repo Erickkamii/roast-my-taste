@@ -2,9 +2,19 @@ import type { SpotifyUser, SpotifyTrack, SpotifyArtist, RoastData } from './type
 
 const API_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8080').replace(/\/$/, '')
 
+function getToken(): string | null {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem('spotify_token')
+}
+
 export async function fetchJson<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = getToken()
   const headers = new Headers(options.headers)
   headers.set('Content-Type', 'application/json')
+
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`)
+  }
 
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
@@ -43,10 +53,6 @@ interface BackendRoast {
   personalityTags: string[]
 }
 
-function spotifySearchUrl(type: 'track' | 'artist', query: string): string {
-  return `https://open.spotify.com/search/${type === 'track' ? '' : 'artist:'}${encodeURIComponent(query)}`
-}
-
 function mapTrack(track: BackendTrack): SpotifyTrack {
   return {
     id: track.id,
@@ -54,7 +60,7 @@ function mapTrack(track: BackendTrack): SpotifyTrack {
     artists: (track.artistsNames || []).map((name) => ({ name })),
     album: { name: '', images: [] },
     duration_ms: track.duration,
-    external_urls: { spotify: spotifySearchUrl('track', track.name) },
+    external_urls: { spotify: `https://open.spotify.com/search/${encodeURIComponent(track.name)}` },
   }
 }
 
@@ -65,7 +71,7 @@ function mapArtist(artist: BackendArtist): SpotifyArtist {
     images: [],
     genres: artist.genres || [],
     followers: { total: 0 },
-    external_urls: { spotify: spotifySearchUrl('artist', artist.name) },
+    external_urls: { spotify: `https://open.spotify.com/search/artist:${encodeURIComponent(artist.name)}` },
   }
 }
 
@@ -118,5 +124,6 @@ export function formatDuration(ms: number): string {
 }
 
 export function logout() {
+  localStorage.removeItem('spotify_token')
   window.location.href = '/'
 }

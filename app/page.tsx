@@ -26,33 +26,43 @@ export default function HomePage() {
     category: 'Gosto Eclético',
   }
 
-useEffect(() => {
-  const loadUserData = async () => {
-    try {
-      const userData = await fetchUserProfile()
-      setUser(userData)
+  useEffect(() => {
+    // Captura o token que vem na URL após o login
+    const url = new URL(window.location.href)
+    const tokenFromUrl = url.searchParams.get('token')
 
-      const [tracks, artists, initialRoast] = await Promise.allSettled([
-        fetchTopTracks('medium_term', 20),
-        fetchTopArtists('medium_term', 20),
-        generateRoast(),
-      ])
-
-      if (tracks.status === 'fulfilled') setTopTracks(tracks.value)
-      if (artists.status === 'fulfilled') setTopArtists(artists.value)
-      setRoast(initialRoast.status === 'fulfilled' ? initialRoast.value : fallbackRoast)
-    } catch {
-      setUser(null)
-    } finally {
-      setIsLoadingUser(false)
-      setIsLoadingTracks(false)
-      setIsLoadingArtists(false)
-      setIsLoadingRoast(false)
+    if (tokenFromUrl) {
+      localStorage.setItem('spotify_token', tokenFromUrl)
+      url.searchParams.delete('token')
+      window.history.replaceState({}, '', url.toString())
     }
-  }
 
-  loadUserData()
-}, [])
+    const loadUserData = async () => {
+      try {
+        const userData = await fetchUserProfile()
+        setUser(userData)
+
+        const [tracks, artists, initialRoast] = await Promise.allSettled([
+          fetchTopTracks('medium_term', 20),
+          fetchTopArtists('medium_term', 20),
+          generateRoast(),
+        ])
+
+        if (tracks.status === 'fulfilled') setTopTracks(tracks.value)
+        if (artists.status === 'fulfilled') setTopArtists(artists.value)
+        setRoast(initialRoast.status === 'fulfilled' ? initialRoast.value : fallbackRoast)
+      } catch {
+        setUser(null)
+      } finally {
+        setIsLoadingUser(false)
+        setIsLoadingTracks(false)
+        setIsLoadingArtists(false)
+        setIsLoadingRoast(false)
+      }
+    }
+
+    loadUserData()
+  }, [])
 
   const handleRefreshRoast = useCallback(async () => {
     setIsLoadingRoast(true)
