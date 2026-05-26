@@ -40,9 +40,7 @@ export function Header({ user, isLoading }: HeaderProps) {
             </div>
           ) : (
             <Button asChild variant="default" className="bg-primary text-primary-foreground hover:bg-primary/90">
-              <a href={SPOTIFY_LOGIN_URL} className="...">
-                Entrar com Spotify
-              </a>
+              <a href={SPOTIFY_LOGIN_URL}>Entrar com Spotify</a>
             </Button>
           )}
         </nav>

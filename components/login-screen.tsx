@@ -48,10 +48,7 @@ export function LoginScreen() {
           size="lg"
           className="bg-primary text-primary-foreground hover:bg-primary/90"
         >
-          <a href={SPOTIFY_LOGIN_URL} className="flex items-center gap-2">
-            Entrar com Spotify
-            <ArrowRight className="h-4 w-4" />
-          </a>
+          <a href={SPOTIFY_LOGIN_URL}>Entrar com Spotify</a>
         </Button>
 
         <p className="mt-4 text-xs text-muted-foreground">
