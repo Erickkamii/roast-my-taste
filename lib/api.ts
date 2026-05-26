@@ -2,35 +2,25 @@ import type { SpotifyUser, SpotifyTrack, SpotifyArtist, RoastData } from './type
 
 const API_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8080').replace(/\/$/, '')
 
-async function fetchJson<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = getToken()
+const fetchOptions: RequestInit = {
+  credentials: 'include',
+}
 
-  const headers = new Headers(options.headers)
+export async function fetchJson<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const response = await fetch(`${API_URL}${path}`, {
+    ...fetchOptions,
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+  })
 
-  headers.set('Content-Type', 'application/json')
-
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`)
+  if (!response.ok) {
+    throw new Error(`Erro na API: ${response.status}`)
   }
 
-  const controller = new AbortController()
-  const timeout = window.setTimeout(() => controller.abort(), 15000)
-
-  try {
-    const response = await fetch(`${API_URL}${path}`, {
-      ...options,
-      headers,                    
-      signal: controller.signal,
-    })
-
-    if (!response.ok) {
-      throw new Error(`Erro na API: ${response.status}`)
-    }
-
-    return response.json()
-  } finally {
-    window.clearTimeout(timeout)
-  }
+  return response.json()
 }
 
 function getToken(): string | null {
@@ -119,11 +109,15 @@ function mapArtist(artist: BackendArtist): SpotifyArtist {
 export async function fetchUserProfile(): Promise<SpotifyUser> {
   const data = await fetchJson<any>('/api/v1/me')
 
+  const spotifyAttributes = data.authorities?.find(
+    (auth: any) => auth.attributes?.display_name
+  )?.attributes
+
   return {
-    id: data.spotifyId,
-    display_name: data.name,
-    images: [], // Pode melhorar depois pegando do Spotify
-    followers: { total: 0 },
+    id: data.name,                                   
+    display_name: spotifyAttributes?.display_name || data.name,
+    images: spotifyAttributes?.images || [],
+    followers: spotifyAttributes?.followers || { total: 0 },
     country: '',
     product: '',
   }

@@ -25,7 +25,6 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="bg-background">
       <body className="font-sans antialiased min-h-screen bg-background text-foreground">
-        <TokenCapture />
 
         {children}
 
