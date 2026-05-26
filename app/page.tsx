@@ -15,7 +15,6 @@ export default function HomePage() {
   const [topTracks, setTopTracks] = useState<SpotifyTrack[]>([])
   const [topArtists, setTopArtists] = useState<SpotifyArtist[]>([])
   const [roast, setRoast] = useState<RoastData | null>(null)
-
   const [isLoadingUser, setIsLoadingUser] = useState(true)
   const [isLoadingTracks, setIsLoadingTracks] = useState(true)
   const [isLoadingArtists, setIsLoadingArtists] = useState(true)
@@ -28,26 +27,10 @@ export default function HomePage() {
   }
 
 useEffect(() => {
-  const url = new URL(window.location.href)
-  const hasOAuthParams = url.searchParams.has('code') || url.searchParams.has('state')
-
-  // Se voltou do login com Spotify, limpa a URL e força reload (resolve problema de cookie)
-  if (hasOAuthParams) {
-    url.searchParams.delete('code')
-    url.searchParams.delete('state')
-    window.history.replaceState({}, '', url.toString())
-
-    // Força reload para garantir que o cookie de sessão seja reconhecido corretamente
-    window.location.reload()
-    return
-  }
-
   const loadUserData = async () => {
     try {
       const userData = await fetchUserProfile()
       setUser(userData)
-
-      setIsLoadingRoast(true)
 
       const [tracks, artists, initialRoast] = await Promise.allSettled([
         fetchTopTracks('medium_term', 20),
