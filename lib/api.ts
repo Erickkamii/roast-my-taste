@@ -2,25 +2,15 @@ import type { SpotifyUser, SpotifyTrack, SpotifyArtist, RoastData } from './type
 
 const API_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8080').replace(/\/$/, '')
 
-function getToken(): string | null {
-  if (typeof window === 'undefined') return null
-  return localStorage.getItem('spotify_token')
-}
-
 export async function fetchJson<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = getToken()
   const headers = new Headers(options.headers)
   headers.set('Content-Type', 'application/json')
 
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`)
-  }
-
-const response = await fetch(`${API_URL}${path}`, {
-  ...options,
-  headers,
-  credentials: 'include',           
-})
+  const response = await fetch(`${API_URL}${path}`, {
+    ...options,
+    headers,
+    credentials: 'include',
+  })
 
   if (!response.ok) {
     throw new Error(`Erro na API: ${response.status}`)
@@ -29,25 +19,8 @@ const response = await fetch(`${API_URL}${path}`, {
   return response.json()
 }
 
-// ==================== Token Helpers ====================
-export function saveTokenFromUrl() {
-  if (typeof window === 'undefined') return
-  const url = new URL(window.location.href)
-  const token = url.searchParams.get('token')
-
-  if (token) {
-    localStorage.setItem('spotify_token', token)
-    url.searchParams.delete('token')
-    window.history.replaceState({}, '', url.toString())
-  }
-}
-
-export function logout() {
-  localStorage.removeItem('spotify_token')
-  window.location.href = '/'
-}
-
 // ==================== API Functions ====================
+
 interface BackendTrack {
   id: string
   name: string
@@ -114,6 +87,7 @@ export async function fetchUserProfile(): Promise<SpotifyUser> {
     product: attributes.product || '',
   }
 }
+
 export async function fetchTopTracks(_timeRange: string = 'medium_term', limit: number = 10): Promise<SpotifyTrack[]> {
   const data = await fetchJson<BackendTrack[]>('/api/v1/debug/top-tracks')
   return data.slice(0, limit).map(mapTrack)
@@ -141,4 +115,8 @@ export function formatDuration(ms: number): string {
   const minutes = Math.floor(ms / 60000)
   const seconds = Math.floor((ms % 60000) / 1000)
   return `${minutes}:${seconds.toString().padStart(2, '0')}`
+}
+
+export function logout() {
+  window.location.href = '/'
 }
